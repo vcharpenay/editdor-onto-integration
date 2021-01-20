@@ -1,0 +1,7 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ssn: <http://www.w3.org/ns/ssn/> .
+@prefix saref: <https://saref.etsi.org/core/> .
+
+saref:Device rdfs:subClassOf ssn:System .
+
+saref:Property rdfs:subClassOf ssn:Property .

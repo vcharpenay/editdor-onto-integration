@@ -1,0 +1,40 @@
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+prefix sosa: <http://www.w3.org/ns/sosa/>
+prefix ssn: <http://www.w3.org/ns/ssn/>
+prefix st: <http://ns.inria.fr/sparql-template/>
+
+template <./src/class2label.rqg> {
+    format {
+        """\{ "const": "%s", "description": "%s" \}"""
+        ?uri
+        ?desc
+    } ; separator = ",\n"
+}
+from <https://saref.etsi.org/core/>
+from <http://www.w3.org/ns/ssn/>
+from <http://www.w3.org/ns/sosa/>
+from <./alignments.ttl>
+where {
+    # retrieve class definitions
+    # a definition may have several descriptions -> concatenate them
+    {
+        select ?uri (group_concat(?singleDesc ; separator = " ") as ?desc) where {
+            ?uri a owl:Class ;
+                rdfs:comment ?singleDesc .
+            filter(!contains(?singleDesc, "\n")) # TODO or remove  linebreak instead?
+        } group by ?uri
+    }
+
+    # select classes that fit as annotations of Things or Properties
+    {
+        values ?thing { ssn:System sosa:Platform sosa:FeatureOfInterest }
+        ?uri rdfs:subClassOf+ ?thing .
+    }
+    union
+    {
+        ?uri rdfs:subClassOf+ ssn:Property .
+    }
+}
